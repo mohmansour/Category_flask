@@ -14,6 +14,7 @@ class User(Base):
     email = Column(String(250), nullable=False)
     picture = Column(String(250))
 
+
 class Sport(Base):
     __tablename__ = 'sport'
 
@@ -65,7 +66,6 @@ class Latest(Base):
     item_id = Column(Integer, ForeignKey('item.id'))
     item = relationship(Item)
 
-
     @property
     def serialize(self):
         """Return object data in easily serializeable format"""
@@ -74,6 +74,7 @@ class Latest(Base):
             'description': self.description,
             'id': self.id,
         }
+
 
 engine = create_engine('sqlite:///sport.db')
 

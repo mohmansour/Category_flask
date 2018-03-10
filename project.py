@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Sport, Item, User, Latest 
+from database_setup import Base, Sport, Item, User, Latest
 from flask import session as login_session
 import random
 import string
@@ -46,7 +46,6 @@ def fbconnect():
     access_token = request.data
     print "access token received %s " % access_token
 
-
     app_id = json.loads(open('fb_client_secret.json', 'r').read())[
         'web']['app_id']
     app_secret = json.loads(
@@ -55,7 +54,6 @@ def fbconnect():
         app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
-
 
     # Use token to get user info from API
     userinfo_url = "https://graph.facebook.com/v2.8/me"
@@ -114,7 +112,8 @@ def fbdisconnect():
     facebook_id = login_session['facebook_id']
     # The access token must me included to successfully logout
     access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (
+        facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
     return "you have been logged out"
@@ -255,7 +254,8 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(json.dumps(
+            'Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -279,7 +279,7 @@ def ItemJSON(sport_id, item_id):
 def sportsJSON():
     sports = session.query(Sport).all()
     latests = session.query(Latest).all()
-    return jsonify(sports=[r.serialize for r in sports],latests=[l.serialize for l in latests])
+    return jsonify(sports=[r.serialize for r in sports], latests=[l.serialize for l in latests])
 
 
 # Show all Sports (done)
@@ -289,25 +289,30 @@ def showSports():
     sports = session.query(Sport).order_by(asc(Sport.name))
     latests = session.query(Latest).all()
     if 'username' not in login_session:
-        return render_template('publicsports.html', sports=sports , latests = latests)
+        return render_template('publicsports.html', sports=sports, latests=latests)
     else:
-        return render_template('sports.html', sports=sports , latests = latests)
+        return render_template('sports.html', sports=sports, latests=latests)
 
 # Create a new Sport (done)
+
+
 @app.route('/sport/new/', methods=['GET', 'POST'])
 def newSport():
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        newSport = Sport(name=request.form['name'], user_id=login_session['user_id'])
+        newSport = Sport(
+            name=request.form['name'], user_id=login_session['user_id'])
         session.add(newSport)
-        flash('New sport %s Successfully Created' % newSport.name)
         session.commit()
+        flash('New sport %s Successfully Created' % newSport.name)
         return redirect(url_for('showSports'))
     else:
         return render_template('newSport.html')
 
 # Edit a Sport (done)
+
+
 @app.route('/sport/<int:sport_id>/edit/', methods=['GET', 'POST'])
 def editSport(sport_id):
     editedSport = session.query(
@@ -319,7 +324,9 @@ def editSport(sport_id):
     if request.method == 'POST':
         if request.form['name']:
             editedSport.name = request.form['name']
+            session.add(editedSport)
             flash('sport Successfully Edited %s' % editedSport.name)
+            session.commit()
             return redirect(url_for('showSports'))
     else:
         return render_template('editSport.html', sport=editedSport)
@@ -334,6 +341,12 @@ def deleteSport(sport_id):
     if sportToDelete.user_id != login_session['user_id']:
         return "<script>function myFunction() {alert('You are not authorized to delete this sport. Please create your own sport in order to delete.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
+        related1 = session.query(Item).filter_by(sport_id=sport_id).all()
+        session.delete(related1)
+        session.commit()
+        related2 = session.query(Item).filter_by(sport_id=sport_id).all()
+        session.delete(related2)
+        session.commit()
         session.delete(sportToDelete)
         flash('%s Successfully Deleted' % sportToDelete.name)
         session.commit()
@@ -342,6 +355,8 @@ def deleteSport(sport_id):
         return render_template('deleteSport.html', sport=sportToDelete)
 
 # Show a Sport menu (done)
+
+
 @app.route('/sport/<int:sport_id>/')
 @app.route('/sport/<int:sport_id>/menu/')
 def showMenu(sport_id):
@@ -355,6 +370,8 @@ def showMenu(sport_id):
         return render_template('menu.html', items=items, sport=sport, creator=creator)
 
 # Create a new menu item (done)
+
+
 @app.route('/sport/<int:sport_id>/menu/new/', methods=['GET', 'POST'])
 def newItem(sport_id):
     if 'username' not in login_session:
@@ -363,12 +380,16 @@ def newItem(sport_id):
     if login_session['user_id'] != sport.user_id:
         return "<script>function myFunction() {alert('You are not authorized to add menu items to this sport. Please create your own sport in order to add items.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
-        newItem = Item(name=request.form['name'], description=request.form['description'], sport_id=sport_id, user_id=sport.user_id)
-        latestToDelete = session.query(Latest).filter_by(id=1).one()
+        newItem = Item(
+            name=request.form['name'], description=request.form['description'], sport_id=sport_id, user_id=sport.user_id)
+        session.add(newItem)
+        session.commit()
+        latestToDelete = session.query(Latest).first()
         session.delete(latestToDelete)
         session.commit()
-        newItem = Latest(name=request.form['name'], description=request.form['description'], sport_id=sport_id, user_id=sport.user_id , item_id = newItem.id)
-        session.add(newItem)
+        newLatest = Latest(name=request.form['name'], description=request.form['description'],
+                           sport_id=sport_id, user_id=sport.user_id, item_id=newItem.id)
+        session.add(newLatest)
         session.commit()
         flash('New Menu %s Item Successfully Created' % (newItem.name))
         return redirect(url_for('showMenu', sport_id=sport_id))
@@ -376,6 +397,8 @@ def newItem(sport_id):
         return render_template('newmenuitem.html', sport_id=sport_id)
 
 # Edit a menu item (done)
+
+
 @app.route('/sport/<int:sport_id>/menu/<int:item_id>/edit', methods=['GET', 'POST'])
 def editItem(sport_id, item_id):
     if 'username' not in login_session:
@@ -387,8 +410,6 @@ def editItem(sport_id, item_id):
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
-        if request.form['description']:
-            editedItem.description = request.form['description']
         if request.form['description']:
             editedItem.description = request.form['description']
         session.add(editedItem)
@@ -410,11 +431,11 @@ def deleteItem(sport_id, item_id):
         return "<script>function myFunction() {alert('You are not authorized to delete menu items to this sport. Please create your own sport in order to delete items.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
         session.delete(itemToDelete)
-        session.commit()
         flash('Menu Item Successfully Deleted')
+        session.commit()
         return redirect(url_for('showMenu', sport_id=sport_id))
     else:
-        return render_template('deleteItem.html', item=itemToDelete)
+        return render_template('deletemenuitem.html', item=itemToDelete)
 
 
 # Disconnect based on provider (done)

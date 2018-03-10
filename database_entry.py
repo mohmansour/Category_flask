@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Sport, Base, Item, User , Latest
+from database_setup import Sport, Base, Item, User, Latest
 
 engine = create_engine('sqlite:///sport.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -25,30 +25,32 @@ User1 = User(name="Robo Barista", email="tinnyTim@udacity.com",
 session.add(User1)
 session.commit()
 
-#create categories 
+# create categories
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Soccer")
 
 session.add(sport1)
 session.commit()
 
-item1 = Item(user_id=1, name="Ball", description="each 11 players work on shooting it into the opposite team ", sport=sport1)
+item1 = Item(user_id=1, name="Ball",
+             description="each 11 players work on shooting it into the opposite team ", sport=sport1)
 
-item1 = Latest(user_id=1, name="Ball", description="each 11 players work on shooting it into the opposite team ", sport=sport1)
+item1 = Latest(user_id=1, name="Ball",
+               description="each 11 players work on shooting it into the opposite team ", sport=sport1)
 
 session.add(item1)
 session.commit()
 
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Basketball")
 
 session.add(sport1)
 session.commit()
 
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Baseball")
 
 session.add(sport1)
@@ -62,62 +64,68 @@ session.add(item1)
 session.commit()
 
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Frisbee")
 
 session.add(sport1)
 session.commit()
 
-item1 = Item(user_id=1, name="frisbee", description="thrown plate ", sport=sport1)
+item1 = Item(user_id=1, name="frisbee",
+             description="thrown plate ", sport=sport1)
 
-item1 = Latest(user_id=1, name="frisbee", description="thrown plate ", sport=sport1)
+item1 = Latest(user_id=1, name="frisbee",
+               description="thrown plate ", sport=sport1)
 
 session.add(item1)
 session.commit()
 
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Rock Climbing")
 
 session.add(sport1)
 session.commit()
 
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Foosball ")
 
 session.add(sport1)
 session.commit()
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Snowboarding ")
 
 session.add(sport1)
 session.commit()
 
-item1 = Item(user_id=1, name="Goggles", description="each 11 players work on shooting it into the opposite team ", sport=sport1)
+item1 = Item(user_id=1, name="Goggles",
+             description="each 11 players work on shooting it into the opposite team ", sport=sport1)
 
-item1 = Latest(user_id=1, name="Snowboard", description="Best for any terrain & conditions", sport=sport1)
+item1 = Latest(user_id=1, name="Snowboard",
+               description="Best for any terrain & conditions", sport=sport1)
 
 session.add(item1)
 session.commit()
 
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Skating ")
 
 session.add(sport1)
 session.commit()
 
-#hi
+# hi
 sport1 = Sport(user_id=1, name="Hockey")
 
 session.add(sport1)
 session.commit()
 
-item1 = Item(user_id=1, name="Stick", description="used to move the black block", sport=sport1)
+item1 = Item(user_id=1, name="Stick",
+             description="used to move the black block", sport=sport1)
 
-item1 = Latest(user_id=1, name="Stick", description="used to move the black block", sport=sport1)
+item1 = Latest(user_id=1, name="Stick",
+               description="used to move the black block", sport=sport1)
 
 session.add(item1)
 session.commit()
