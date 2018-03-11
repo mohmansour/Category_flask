@@ -315,10 +315,9 @@ def newSport():
 
 @app.route('/sport/<int:sport_id>/edit/', methods=['GET', 'POST'])
 def editSport(sport_id):
-    editedSport = session.query(
-        Sport).filter_by(id=sport_id).one()
     if 'username' not in login_session:
         return redirect('/login')
+    editedSport = session.query(Sport).filter_by(id=sport_id).one()
     if editedSport.user_id != login_session['user_id']:
         return "<script>function myFunction() {alert('You are not authorized to edit this sport. Please create your own sport in order to edit.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
@@ -335,13 +334,13 @@ def editSport(sport_id):
 # Delete a Sport (done)
 @app.route('/sport/<int:sport_id>/delete/', methods=['GET', 'POST'])
 def deleteSport(sport_id):
-    sportToDelete = session.query(Sport).filter_by(id=sport_id).one()
     if 'username' not in login_session:
         return redirect('/login')
+    sportToDelete = session.query(Sport).filter_by(id=sport_id).one()
     if sportToDelete.user_id != login_session['user_id']:
         return "<script>function myFunction() {alert('You are not authorized to delete this sport. Please create your own sport in order to delete.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
-        related1 = session.query(Item).filter_by(sport_id=sport_id).all()
+        related1 = session.query(Latest).filter_by(sport_id=sport_id).all()
         session.delete(related1)
         session.commit()
         related2 = session.query(Item).filter_by(sport_id=sport_id).all()
